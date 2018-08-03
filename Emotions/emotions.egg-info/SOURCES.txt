@@ -1,0 +1,7 @@
+README
+setup.py
+emotions/__init__.py
+emotions.egg-info/PKG-INFO
+emotions.egg-info/SOURCES.txt
+emotions.egg-info/dependency_links.txt
+emotions.egg-info/top_level.txt
