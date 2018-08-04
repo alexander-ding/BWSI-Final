@@ -2,7 +2,11 @@ import pooja as pj
 import thorben as tb
 import pinar as pn
 import genre_recognition as gr
+import emotions
 import random
+import webbrowser
+import urllib.parse as parse
+
 from flask import Flask, render_template
 from flask_ask import Ask, statement, question, session
 from pathlib import Path
@@ -17,10 +21,10 @@ tb_db = tb.Database()
 tb_db.load("data/face_db.dat")
 print("thorben loaded")
 
-#print("Loading pinar")
-#pn_db = pn.Database()
-#print("pinar loaded")
-
+print("Loading pinar")
+pn_db = pn.Database()
+pn_db.load("data/img_db.dat")
+print("pinar loaded")
 
 app = Flask(__name__)
 ask = Ask(app, '/')
@@ -51,6 +55,20 @@ def matching_song():
         session.attributes["song_retry"] = True
         return question("Sorry, I can't match this song. Would you like me to try again?")
     return statement(result)
+
+@ask.intent("GenreIntent")
+def match_genre():
+    audio = pj.input_mic(5) / 2**16
+    result = gr.get_label(audio)
+    return statement("I think this is {} music".format(result))
+
+@ask.intent("GoodBoiIntent")
+def thanks():
+    outs = ["Love you!",
+            "Aw, you're welcome",
+            "At your service"]
+    id = random.randint(0,len(outs)-1)
+    return statement(outs[id])
 
 @ask.intent("AMAZON.YesIntent")
 def yes_intent():
@@ -104,6 +122,7 @@ def get_name(first, last):
 @ask.intent("FaceRecIntent")
 def recognizing_face():
     picture = tb.from_camera()
+    labels = emotions.emotion(picture)
     ret_data = tb_db.match(picture)
     if len(ret_data) == 0:
         return statement("I don't see any faces")
@@ -116,20 +135,28 @@ def recognizing_face():
         else:
             names.append(label)
     if unseen_cnt > 0:
-        names.append("{} unrecognized faces".format(unseen_cnt))
-    
+        names.append("{} unrecognized face".format(unseen_cnt))
+    if unseen_cnt > 1:
+        names = names + "s"
     out = "I see "
     if len(names) == 1:
-        out = out + names[0]
+        out = out + names[0] + ". "
     else:
-        out = out + ", ".join(out[:-1]) + ", and " + out[-1]
+        out = out + ", ".join(names[:-1]) + ", and " + names[-1] + ". "
+    if len(labels) == 1:
+        out += "You seem {} or {}.".format(labels[0][0], labels[0][1])
+    else:
+        for l in labels:
+            out += "One of you seem {} and {}. ".format(l[0], l[1]) 
+    print(out)
     return statement(out)
 
-"""
-@ask.intent("KeywordIntent")
-def keyword_imaging():
-    print("I got it")
-    return question("Function not implemented yet")"""
+@ask.intent("ImageIntent", mapping={"query":"ImageQuery"})
+def keyword_images(query):
+    ids = pn_db.match(query, 10)
+    f = {'ids':' '.join(ids), 'query':query}
+    webbrowser.open_new("http://localhost:5001/images?" + parse(f))
+    return statement("Here you go. The results are on the comptuer.")
 
 @ask.intent("AMAZON.FallbackIntent")
 def fallback():
