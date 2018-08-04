@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import pickle
-with open("mean.pkl","rb") as f:
+with open("data/mean.pkl","rb") as f:
     mean = pickle.load(f)
-with open("std.pkl","rb") as f:
+with open("data/std.pkl","rb") as f:
     std = pickle.load(f)
 # run this cell to download the models from dlib
 from dlib_models import download_model, download_predictor, load_dlib_models
@@ -31,7 +31,7 @@ class Model:
         self.dense1 = dense(256, 512, weight_initializer=Model.init)
         self.dense2 = dense(512, num_out, weight_initializer=Model.init)
         if (load):
-            data = np.load("npmodelParam.npz")
+            data = np.load("data/npmodelParam.npz")
             self.conv1.weight = data["l1w"]
             self.conv1.bias = data["l1b"]
             self.conv2.weight = data["l2w"]
@@ -92,35 +92,31 @@ shape_predictor = models["shape predict"]
 def emotion (pic):
     detections = list(face_detect(pic))
     detect = list(detections)
+    outputs = []
+    dictionary = {0: "Angry", 1: "disgusted", 2: "afraid", 3: "Happy", 4: "Sad", 5: "Surprised", 6: "Neutral"}
+    print(len(detect))
     for i in detect:
         width = np.abs(i.left() - i.right())
         bottom = i.bottom() + 50
         top = i.top() - 50  # height = top - bottom # top += height*0.3
         left = i.left()
         right = i.right()
-        print(width)
         top = bottom - width - 100
         if top <= 0:
             top = 0
-        faceArray = (pic[top:bottom, left - 50:left + width + 50])
-    # gets the headshot += a little bit of the person
-    x, y, z = faceArray.shape  ## where z is the RGB dimension
-    ### Method block begin
-    blackWhite = np.copy(faceArray)
-    blackWhite[:] = faceArray.mean(axis=-1, keepdims=1)
-    blackWhite = (blackWhite[:, :, 0])
-    # grayscales the image
-    filtered_black_white = filterer(blackWhite)
-    # changes the resolution to 48x48
-    filtered_black_white = (filtered_black_white.flatten() - mean) / std
-    # normalize data
-    filtered_black_white = np.reshape(filtered_black_white, (1, 1, 48, 48))
-    print(np.shape(filtered_black_white))
-    output = model(filtered_black_white)
-    print(output)
-    orders = (np.argsort(output))
-    dictionary = {0: "Angry", 1: "Disgust", 2: "Fear", 3: "Happy", 4: "Sad", 5: "Surprise", 6: "Neutral"}
-    print(dictionary[orders[0][6]])
-    print(dictionary[orders[0][5]])
-    # gives the face
-    #:0 = angry, 1 = Digust, 2 = Fear, 3 = Happy, 4 = Sad, 5 = Surprise, 6 = Neutral
+        faceArray = pic[top:bottom, left - 50:left + width + 50]
+        x, y, z = faceArray.shape  ## where z is the RGB dimension
+        ### Method block begin
+        blackWhite = np.copy(faceArray)
+        blackWhite[:] = faceArray.mean(axis=-1, keepdims=1)
+        blackWhite = (blackWhite[:, :, 0])
+        # grayscales the image
+        filtered_black_white = filterer(blackWhite)
+        # changes the resolution to 48x48
+        filtered_black_white = (filtered_black_white.flatten() - mean) / std
+        # normalize data
+        filtered_black_white = np.reshape(filtered_black_white, (1, 1, 48, 48))
+        output = model(filtered_black_white)
+        orders = np.argsort(output)
+        outputs.append((dictionary[orders[0][6]], dictionary[orders[0][5]]))
+    return outputs
