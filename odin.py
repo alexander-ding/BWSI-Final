@@ -44,7 +44,7 @@ def start_skill():
 
 @ask.intent("AMAZON.HelpIntent")
 def help():
-    long_helpful_text = "placeholder"
+    long_helpful_text = "I can read your face! If you're not in the database, tell me to learn your face. I can also identify the music you're playing and guess it's genre. Also, tell me to look up images of interesting things"
     return statement(long_helpful_text)
 
 @ask.intent("SongIntent")
@@ -95,11 +95,12 @@ def no_intent():
 
 @ask.intent("FaceAddIntent")
 def adding_face():
-    session.attributes["get_name"] = True
     global ps
     for i in range(1,5):
         ps.append(tb.from_camera())
-    
+    if len(ps) == 0:
+        return statement("Sorry. I can't identify your face. Make sure that only one person is in front of the camera and that your whole face is there.")
+    session.attributes["get_name"] = True
     return question("Okay, I got your pictures. What is your name?")
 
 def add_face_confirmed():
@@ -136,8 +137,8 @@ def recognizing_face():
             names.append(label)
     if unseen_cnt > 0:
         names.append("{} unrecognized face".format(unseen_cnt))
-    if unseen_cnt > 1:
-        names = names + "s"
+    elif unseen_cnt > 1:
+        names.append("{} unrecognized faces".format(unseen_cnt))
     out = "I see "
     if len(names) == 1:
         out = out + names[0] + ". "
@@ -152,9 +153,8 @@ def recognizing_face():
 
 @ask.intent("ImageIntent", mapping={"query":"ImageQuery"})
 def keyword_images(query):
-    f = {'query':query}
-    webbrowser.open_new("http://localhost:5001/search_by_text?" + parse(f))
-    return statement("Here you go. The results are on the comptuer.")
+    webbrowser.open_new("http://localhost:5001/search_by_text?" + parse.urlencode({'query':query}))
+    return statement("Here you go. The results are on the computer.")
 
 @ask.intent("AMAZON.FallbackIntent")
 def fallback():
