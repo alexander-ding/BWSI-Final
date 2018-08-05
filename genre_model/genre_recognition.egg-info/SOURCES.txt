@@ -1,0 +1,7 @@
+setup.py
+genre_recognition/__init__.py
+genre_recognition/base.py
+genre_recognition.egg-info/PKG-INFO
+genre_recognition.egg-info/SOURCES.txt
+genre_recognition.egg-info/dependency_links.txt
+genre_recognition.egg-info/top_level.txt
