@@ -148,14 +148,12 @@ def recognizing_face():
     else:
         for l in labels:
             out += "One of you seem {} and {}. ".format(l[0], l[1]) 
-    print(out)
     return statement(out)
 
 @ask.intent("ImageIntent", mapping={"query":"ImageQuery"})
 def keyword_images(query):
-    ids = pn_db.match(query, 10)
-    f = {'ids':' '.join(ids), 'query':query}
-    webbrowser.open_new("http://localhost:5001/images?" + parse(f))
+    f = {'query':query}
+    webbrowser.open_new("http://localhost:5001/search_by_text?" + parse(f))
     return statement("Here you go. The results are on the comptuer.")
 
 @ask.intent("AMAZON.FallbackIntent")
