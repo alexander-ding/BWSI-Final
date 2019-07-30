@@ -12,8 +12,8 @@ Some of the libraries used:
 `PyTorch`, `numpy`, [`mygrad`](https://github.com/rsokl/MyGrad), `OpenCV-Python`, `matplotlib`
 
 ## Other Projects Created during BWSI
-[Pooja](https://github.com/alexding123/Pooja), a song recognition library
-[Thorben](https://github.com/alexding123/Thorben), a library for learning new faces and recognizing them in photos
-[Pinar](https://github.com/alexding123/Pinar), a home-brewed parallel of Google image search. 
+1. [Pooja](https://github.com/alexding123/Pooja), a song recognition library
+2. [Thorben](https://github.com/alexding123/Thorben), a library for learning new faces and recognizing them in photos
+3. [Pinar](https://github.com/alexding123/Pinar), a home-brewed parallel of Google image search. 
 
 Alex Ding, 2018
